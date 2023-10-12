@@ -1,6 +1,6 @@
-# PROJECT NAME
+# 301 - Lab 07 - Custom Servers with Node and Express
 
-project description goes here.
+Build custom API server, which will provide data for City Explorer front-end application.
 
 ## Getting Started
 
@@ -44,8 +44,22 @@ Any environment configuration steps.
 
 ### Languages & tools
 
+Tools used were express, cors, dotenv
+
 ## Change Log
 
-## Collaborators
+### 10-17-2022
 
-List collaborators here.
+Name of feature: Build back end
+
+Estimate of time needed to complete: 5 hrs
+
+Start time: 12:00 pm
+
+Finish time: 5:00 pm
+
+Actual time needed to complete: 5 hrs
+
+## Credit and Collaborations
+
+Chat GPT
