@@ -95,7 +95,9 @@ class Forecast {
 // Error handler, inboked any time 'throw new Error' encountered in code
 app.use( (error, request, response, next) => {
 
-  response.status(500).send(error.message);
+  // response.status(500).send(error.message);
+  console.error(error); // Log the error to the server console for debugging
+  response.status(500).json({ error: 'Internal Server Error, Cannot Display Forecast' }); // Send a JSON response with a 500 status and an error message
 
 });
 
