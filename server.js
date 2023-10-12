@@ -55,8 +55,8 @@ app.get('/weather', (request, response, next) => {
       // Check if queries match data of a city, if so return true
       return (
         city.city_name === searchQuery &&
-        parseFloat(city.lat) === latitude &&
-        parseFloat(city.lon) === longitude
+        Math.floor(city.lat) === Math.floor(latitude) && // Remove decimal points so only compares whole integer of latitude/longitude
+        Math.floor(city.lon) === Math.floor(longitude)
       );
 
     });
