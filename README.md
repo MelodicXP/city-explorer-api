@@ -48,7 +48,39 @@ Tools used were express, cors, dotenv
 
 ## Change Log
 
-### 10-21-2022
+### 10-23-2022 - Lab 08
+
+Name of feature: Connect back-end to Movie DB
+
+Estimate of time needed to complete: 5 hrs
+
+Start time: 7:45 am
+
+Finish time: 9:00 am
+
+Start time: 2:30 pm
+
+Finish time: 3:30 pm
+
+Start time: 4:30 pm
+
+Finish time: 6:00 pm
+
+Actual time needed to complete:
+
+### 10-21-2022 - Lab 08
+
+Name of feature: Connect back-end to Weatherbit API
+
+Estimate of time needed to complete: 5 hrs
+
+Start time: 8:00 am
+
+Finish time: 11:00 am
+
+Actual time needed to complete: 5 hrs
+
+### 10-20-2022 - Lab 08
 
 Name of feature: Connect back-end to Weatherbit API
 
@@ -60,19 +92,7 @@ Finish time: 4:30 pm
 
 Actual time needed to complete:
 
-### 10-20-2022
-
-Name of feature: Connect back-end to Weatherbit API
-
-Estimate of time needed to complete: 5 hrs
-
-Start time: 2:30 pm
-
-Finish time: 4:30 pm
-
-Actual time needed to complete:
-
-### 10-17-2022
+### 10-17-2022 - Lab 07
 
 Name of feature: Build back end
 
