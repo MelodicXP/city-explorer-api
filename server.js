@@ -125,7 +125,7 @@ class LocalMovie {
     this.voteCount = obj.vote_count;
     this.imageURL = obj.poster_path;
     this.popularity = obj.popularity;
-    this.releasedDate = obj.release_date;
+    this.releaseDate = obj.release_date;
   }
 }
 

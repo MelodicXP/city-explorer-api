@@ -64,7 +64,7 @@ Finish time: 3:30 pm
 
 Start time: 4:30 pm
 
-Finish time: 6:00 pm
+Finish time: 5:30 pm
 
 Actual time needed to complete:
 
