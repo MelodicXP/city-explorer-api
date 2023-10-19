@@ -48,6 +48,30 @@ Tools used were express, cors, dotenv
 
 ## Change Log
 
+### 10-21-2022
+
+Name of feature: Connect back-end to Weatherbit API
+
+Estimate of time needed to complete: 5 hrs
+
+Start time: 2:30 pm
+
+Finish time: 4:30 pm
+
+Actual time needed to complete:
+
+### 10-20-2022
+
+Name of feature: Connect back-end to Weatherbit API
+
+Estimate of time needed to complete: 5 hrs
+
+Start time: 2:30 pm
+
+Finish time: 4:30 pm
+
+Actual time needed to complete:
+
 ### 10-17-2022
 
 Name of feature: Build back end
