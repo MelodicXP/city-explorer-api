@@ -48,6 +48,18 @@ Tools used were express, cors, dotenv
 
 ## Change Log
 
+### 10-24-2022 - Lab 08
+
+Name of feature: Connect back-end to Movie DB
+
+Estimate of time needed to complete: 5 hrs
+
+Start time: 7:45 am
+
+Finish time: 9:00 am
+
+Actual time needed to complete: 4 hours and 30 minutes
+
 ### 10-23-2022 - Lab 08
 
 Name of feature: Connect back-end to Movie DB
@@ -66,7 +78,7 @@ Start time: 4:30 pm
 
 Finish time: 5:30 pm
 
-Actual time needed to complete:
+Actual time needed to complete: in progress
 
 ### 10-21-2022 - Lab 08
 
@@ -90,7 +102,7 @@ Start time: 2:30 pm
 
 Finish time: 4:30 pm
 
-Actual time needed to complete:
+Actual time needed to complete: in progress
 
 ### 10-17-2022 - Lab 07
 
