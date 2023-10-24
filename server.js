@@ -5,34 +5,26 @@
 require('dotenv').config(); // Allows for use of environment variables
 const express = require('express'); // Framework to manage server and gives functionality to create routes for API
 const cors = require('cors'); // Security for requestes, controlled access to resources
-const weatherData = require('./data/weather.json'); // Import weather.json data into server
+
+// todo - reactivate axios when switch to live
+const axios = require('axios');
+
+// todo - deactivate weatherData and movieData when switch to live
+// const weatherData = require('./data/weather.json'); // Import weather.json data into server
+// const movieData = require('./data/movies.json'); // Import movieData.json data into server
 
 
 const app = express(); // Initialize express
-
 app.use(cors()); // Use express with cors
+
+// todo - reactivate API_Keys when switch to live
+const API_KEY = process.env.WEATHER_API_KEY;
+const MOVIE_API_KEY = process.env.MOVIE_API_KEY;
 
 const PORT = process.env.PORT || 3002; // Use port from .env file
 
 
-// Function to create a Forecast object
-function createForecast(data) {
-
-  // Capture high and low temp
-  let hiTemp = data.high_temp;
-  let lowTemp = data.low_temp;
-
-  // Assign properties to each forecast object created
-  let forecast = {
-
-    description: `Low of ${lowTemp}, high of ${hiTemp} with ${data.weather.description.toLowerCase()}`,
-    date: data.datetime,
-
-  };
-  return new Forecast(forecast);
-}
-
-// Ensure default route connection is working first
+// Initial default route to ensure connection is working fine (do this first)
 app.get('/', (request, response, next) => {
 
   // Message to send back, connection OK
@@ -41,63 +33,110 @@ app.get('/', (request, response, next) => {
 });
 
 
-app.get('/weather', (request, response, next) => {
+// API call to Weatherbit
+app.get('/weather', async (request, expressResponse, next) => {
 
   try {
-    // Establish queries
-    const searchQuery = request.query.city_name;
-    const latitude = parseFloat(request.query.lat); // Convert to number type
-    const longitude = parseFloat(request.query.lon); // Convert to number type
+    // todo - reactivate this section when switch to live
+    // Latitude and longitude queries from client
+    const latitude = request.query.lat;
+    const longitude = request.query.lon;
 
-    // Assign data of city if queries match data of any city in database
-    let cityData = weatherData.find( (city) => {
+    let url = `https://api.weatherbit.io/v2.0/forecast/daily?key=${API_KEY}&lat=${latitude}&lon=${longitude}`;
 
-      // Check if queries match data of a city, if so return true
-      return (
-        city.city_name === searchQuery &&
-        Math.floor(city.lat) === Math.floor(latitude) && // Remove decimal points so only compares whole integer of latitude/longitude
-        Math.floor(city.lon) === Math.floor(longitude)
-      );
+    const axiosResponse = await axios.get(url);
 
-    });
+    let dailyForecastData = axiosResponse.data.data.map( (day) => new DailyForecast(day));
 
-    // If no matching city data was found, throw an error
-    if (!cityData) {
-      throw new Error('City data not found');
-    }
+    // todo - deactivate this section when switch to live
+    // Use local weather data while testing
+    // let dailyForecastData = weatherData.data.map( (day) => new DailyForecast(day));
+    // Work with static data to prevent multiple API requests while testing
+    // expressResponse.status(200).send(dailyForecastData);
 
-    // Extract the daily weather data and create Forecast objects
-    const dailyData = cityData.data;
-    const forecasts = dailyData.map((dayData) => createForecast(dayData));
-
-    // Return data of matching city based on query
-    response.status(200).send(forecasts);
+    // todo - reactivate when switch to live
+    expressResponse.status(200).send(dailyForecastData);
 
   }
   catch (error) {
-    next(error);
+    const errorMessage = 'Internal Server Error, unable to show forecast';
+    next({ message: errorMessage });
   }
 
 });
 
-// Create class for Forecast objects, objects will hold date and description of city data weather
-class Forecast {
+// API call to movieDB
+app.get('/movies', async (request, expressResponse, next) => {
+
+  try {
+    // todo - reactivate this section when switch to live
+    // City name query from client
+    let searchQuery = request.query.searchQuery;
+
+    let url = `https://api.themoviedb.org/3/search/movie?api_key=${MOVIE_API_KEY}&query=${searchQuery}`;
+
+    const axiosResponse = await axios.get(url);
+
+    let localMovies = axiosResponse.data.results.map( (movie) => new LocalMovie(movie));
+
+    // todo - deactivate this section when switch to live
+
+    // Test local data connection
+    // let localMovies = movieData;
+    // console.log(localMovies);
+    // Use local weather data while testing
+    // let localMovies = movieData.results.map( (movie) => new LocalMovie(movie));
+    // work with static date to prevent multipleAPI requests while testing
+    // expressResponse.status(200).send(localMovies);
+
+    // todo - reactivate when switch to live
+    expressResponse.status(200).send(localMovies);
+
+  }
+  catch (error) {
+    const errorMessage = 'Internal Server Error, unable to show movies';
+    next({ message: errorMessage });
+  }
+
+});
+
+
+
+// Class - format weather data
+class DailyForecast {
 
   constructor(obj){
 
-    this.date = obj.date;
-    this.description = obj.description;
+    this.date = obj.datetime;
+    this.description = `Low of ${obj.low_temp}, high of ${obj.high_temp} with ${obj.weather.description.toLowerCase()}`;
 
   }
 
 }
+
+// Class - format movie data
+class LocalMovie {
+
+  constructor(obj){
+
+    this.title = obj.title;
+    this.overview = obj.overview;
+    this.voteAverage = obj.vote_average;
+    this.voteCount = obj.vote_count;
+    this.imageURL = obj.poster_path;
+    this.popularity = obj.popularity;
+    this.releaseDate = obj.release_date;
+
+  }
+}
+
 
 // Error handler, inboked any time 'throw new Error' encountered in code
 app.use( (error, request, response, next) => {
 
   // response.status(500).send(error.message);
   console.error(error); // Log the error to the server console for debugging
-  response.status(500).json({ error: 'Internal Server Error, Cannot Display Forecast' }); // Send a JSON response with a 500 status and an error message
+  response.status(500).json({ error: error.message }); // Send a JSON response with a 500 status and an error message
 
 });
 
