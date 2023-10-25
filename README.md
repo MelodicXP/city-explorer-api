@@ -48,6 +48,22 @@ Tools used were express, cors, dotenv
 
 ## Change Log
 
+### 10-27-2022 - Lab 08
+
+Name of feature: Refactor code - create modules weatherBit and MovieDB
+
+Estimate of time needed to complete: 3 hrs
+
+Start time: 9:15 am
+
+Finish time: 10:00 am
+
+Start time: 11:30 am
+
+Finish time: 12:00 pm
+
+Actual time needed to complete: 4 hours and 30 minutes
+
 ### 10-24-2022 - Lab 08
 
 Name of feature: Connect back-end to Movie DB
