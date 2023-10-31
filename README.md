@@ -48,6 +48,18 @@ Tools used were express, cors, dotenv
 
 ## Change Log
 
+### 10-31-2022 - Lab 10
+
+Name of feature: Add cache to back-end
+
+Estimate of time needed to complete: 3 hrs
+
+Start time: 8:15 am
+
+Finish time: 11:15 am
+
+Actual time needed to complete: 3 hours
+
 ### 10-27-2022 - Lab 09
 
 Name of feature: Refactor code - create modules weatherBit and MovieDB
