@@ -1,6 +1,8 @@
 'use strict';
 
+// todo - reactivate axios when switch to live
 const axios = require('axios');
+const cache = require('./cache');
 
 // todo - deactivate weatherData and movieData when switch to live
 // const weatherData = require('./data/weather.json'); // Import weather.json data into server
@@ -45,25 +47,39 @@ function getWeather(request, expressResponse, next) {
   const latitude = request.query.lat;
   const longitude = request.query.lon;
   const url = `https://api.weatherbit.io/v2.0/forecast/daily?key=${API_KEY}&lat=${latitude}&lon=${longitude}`;
+  const twentyFourHoursInMs = 86400000;
+  const key = `city ${latitude} ${longitude}`; // Create a unique key for the query
 
-  axios.get(url)
+  console.log(key);
 
-    .then(axiosResponse => axiosResponse.data.data.map( (day) => new DailyForecast(day)))
-    .then(dailyForecastData => expressResponse.status(200).send(dailyForecastData))
-    .catch(errorMessage => {
-      errorMessage = 'Internal Server Error, unable to show forecast';
-      next({ message: errorMessage });
-    });
+  // If key matches in cache and timestamp is less than 24 hours, use cache data
+  if ( cache[key] && (Date.now() - cache[key].timestamp < twentyFourHoursInMs) ) {
+    console.log('cache hit - sending data from cache');
+    expressResponse.status(200).send({ data: cache[key].data, timestamp: cache[key].timestamp });
+
+  } else {
+    console.log('cache miss - making a new request');
+    axios.get(url)
+      .then(axiosResponse => axiosResponse.data.data.map( (day) => new DailyForecast(day)))
+      .then(dailyForecastData => {
+        const timeStamp = Date.now(); // Capture time stamp
+        cache[key] = {}; // Create empty object for new data
+        cache[key].data = dailyForecastData; // Store data
+        cache[key].timestamp = timeStamp; // Update timestamp
+        expressResponse.status(200).send({ data: dailyForecastData, timestamp: timeStamp }); // Send new data along with time stamp
+      })
+      .catch(errorMessage => {
+        errorMessage = 'Internal Server Error, unable to show forecast';
+        next({ message: errorMessage });
+      });
+  }
 }
 
 // Class - format weather data
 class DailyForecast {
-
   constructor(obj){
-
     this.date = obj.datetime;
     this.description = `Low of ${obj.low_temp}, high of ${obj.high_temp} with ${obj.weather.description.toLowerCase()}`;
-
   }
 
 }

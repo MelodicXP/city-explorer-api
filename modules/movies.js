@@ -2,6 +2,7 @@
 
 // todo - reactivate axios when switch to live
 const axios = require('axios');
+const cache = require('./cache');
 
 // todo - deactivate movieData when switch to live
 // const movieData = require('./data/movies.json'); // Import movieData.json data into server
@@ -47,27 +48,40 @@ const MOVIE_API_KEY = process.env.MOVIE_API_KEY;
 
 // Function - refactored using .then() - use commented out code above for future reference when testing
 function getMovies(request, expressResponse, next) {
-
   const searchQuery = request.query.searchQuery;
   const url = `https://api.themoviedb.org/3/search/movie?api_key=${MOVIE_API_KEY}&query=${searchQuery}`;
+  const twentyFourHoursInMs = 86400000;
+  const key = `movie ${searchQuery}`;
 
-  axios.get(url)
+  console.log(key);
 
-    .then(axiosResponse => axiosResponse.data.results.map( (movie) => new LocalMovie(movie)))
-    .then(localMovies => expressResponse.status(200).send(localMovies) )
-    .catch(errorMessage => {
-      errorMessage = 'Internal Server Error, unable to show movies';
-      next({ message: errorMessage });
-    });
+  // If key matches in cache and timestamp is less than 24 hours, use cache data
+  if ( cache[key] && (Date.now() - cache[key].timestamp < twentyFourHoursInMs) ) {
+    console.log('cache hit - sending data from cache');
+    expressResponse.status(200).send({ data: cache[key].data, timestamp: cache[key].timestamp });
 
+  } else {
+    console.log('cache miss - making a new request');
+    axios.get(url)
+      .then(axiosResponse => axiosResponse.data.results.map( (movie) => new LocalMovie(movie)))
+      .then(localMovies => {
+        const timeStamp = Date.now(); // Capture time stamp
+        cache[key] = {}; // Create empty object for new data
+        cache[key].data = localMovies; // Store data
+        cache[key].timestamp = timeStamp; // Update timestamp
+        expressResponse.status(200).send({ data: localMovies, timestamp: timeStamp }); // send new data along with time stamp
+      })
+      .catch(errorMessage => {
+        errorMessage = 'Internal Server Error, unable to show movies';
+        next({ message: errorMessage });
+      });
+  }
 }
 
 
 // Class - format movie data
 class LocalMovie {
-
   constructor(obj){
-
     this.title = obj.title;
     this.overview = obj.overview;
     this.voteAverage = obj.vote_average;
@@ -75,7 +89,6 @@ class LocalMovie {
     this.imageURL = obj.poster_path;
     this.popularity = obj.popularity;
     this.releaseDate = obj.release_date;
-
   }
 }
 
