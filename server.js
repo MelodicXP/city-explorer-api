@@ -6,40 +6,44 @@ const cors = require('cors');
 const weatherData = require('./data/weather.json');
 
 const app = express(); // Initiate express
-
-app.use(cors()); // enable cross origin from different sources
+app.use(cors()); // Enable cross origin requests
 
 const PORT = process.env.PORT || 3001;
 
+// Home route
 app.get('/', (request, response) => {
   response.send('hello from the home route!');
 });
 
+// Utility function to round to 3 decimal places
+const roundToThreeDecimals = (num) => Math.round(num * 1000) / 1000;
+
+// Route to handle weather data
 app.get('/weather', (request, response) => {
-  let weatherDataArray = [];
-  weatherDataArray.push(weatherData);
-  console.log('Weather Data Array: ', weatherDataArray);
+  // Destructure query paramters
+  let { cityName, lat, lon } = request.query;
 
-  let cityName = request.query.cityName;
-  console.log('City Name from request: ', cityName);
+  if (!cityName || !lat || !lon) {
+    return response.status(400).send('Missing required query parameters: cityName, lat, lon');
+  }
 
-  let latitude = parseFloat(request.query.lat);
-  latitude = Math.round(latitude * 1000) / 1000;
-  console.log('Latitude from request: ', latitude);
+  // Parse and round latitude and longitude
+  let latitude = roundToThreeDecimals(parseFloat(lat));
+  let longitude = roundToThreeDecimals(parseFloat(lon));
 
-  let longitude = parseFloat(request.query.lon);
-  longitude = Math.round(longitude * 1000) / 1000;
-  console.log('Longitude from request: ', longitude);
-
-  let cityWeatherData = weatherDataArray.filter((city) => {
-    city.lat = Math.round(city.lat * 1000) / 1000;
-    city.lon = Math.round(city.lon * 1000) / 1000;
+  // Filter weather data
+  let cityWeatherData = weatherData.find((city) => {
     return city.city_name.toLowerCase() === cityName.toLowerCase() &&
-           city.lat === latitude &&
-           city.lon === longitude;
+           roundToThreeDecimals(city.lat) === latitude &&
+           roundToThreeDecimals(city.lon) === longitude;
   });
 
-  response.send(cityWeatherData[0]);
+  // If match return city weather data
+  if (cityWeatherData) {
+    response.json(cityWeatherData);
+  } else {
+    response.status(404).send('City weather data not found');
+  }
 });
 
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
