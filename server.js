@@ -10,6 +10,14 @@ app.use(cors()); // Enable cross origin requests
 
 const PORT = process.env.PORT || 3001;
 
+// Class - Forecast
+class Forecast {
+  constructor(date, description) {
+    this.date = date,
+    this.description = description
+  }
+};
+
 // Home route
 app.get('/', (request, response) => {
   response.send('hello from the home route!');
@@ -40,7 +48,13 @@ app.get('/weather', (request, response) => {
 
   // If match return city weather data
   if (cityWeatherData) {
-    response.json(cityWeatherData);
+    let forecastData = [];
+    forecastData = cityWeatherData.data;
+
+    forecastData = cityWeatherData.data.map((day) => {
+      return new Forecast(day.datetime, day.weather.description);
+    });
+    response.send(forecastData);
   } else {
     response.status(404).send('City weather data not found');
   }
