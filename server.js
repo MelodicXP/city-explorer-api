@@ -25,16 +25,17 @@ app.get('/', (request, response) => {
 
 // Weather route
 app.get('/weather', (request, response) => {
-  const { cityName, lat, lon } = request.query;
+  const { city_name, lat, lon } = request.query;
+  console.log('city_name from destructure: ', city_name);
 
   // Validate query parameters
-  const validationError = validateQueryParams(cityName, lat, lon);
+  const validationError = validateQueryParams(city_name, lat, lon);
   if (validationError) {
     return response.status(400).send(validationError);
   }
 
   // Find the city weather data
-  const cityWeatherData = findCityWeatherData(cityName, lat, lon);
+  const cityWeatherData = findCityWeatherData(city_name, lat, lon);
 
   if (cityWeatherData) {
     // Map forecast data and send response
@@ -65,13 +66,13 @@ const findCityWeatherData = (cityName, lat, lon) => {
   });
 };
 
-// Utility function to round to 3 decimal places
-const roundToThreeDecimals = (num) => Math.round(num * 1000) / 1000;
-
 // Function to map forecast data
 const createForecastData = (data) => {
   return data.map((day) => new Forecast(day.datetime, day.weather.description));
 };
+
+// Utility function to round to 3 decimal places
+const roundToThreeDecimals = (num) => Math.round(num * 1000) / 1000;
 
 // Not found response
 app.get('*', (request, response) => {
