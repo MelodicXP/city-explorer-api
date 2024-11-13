@@ -45,6 +45,8 @@ app.get('*', (req, res) => {
   res.status(404).send('Not found');
 });
 
+app.use('*', errorHandler);
+
 // ** 4. Helper Functions ** 
 const validateQueryParams = (cityName, lat, lon) => {
   if (!cityName || !lat || !lon) {
@@ -69,6 +71,10 @@ const createForecastData = (data) => {
 };
 
 const roundToThreeDecimals = (num) => Math.round(num * 1000) / 1000;
+
+const errorHandler = (error, request, response, next) => {
+  response.status(500).send(`Something went wrong. ${error.message}`);
+}
 
 // ** 5. Start Server ** 
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
