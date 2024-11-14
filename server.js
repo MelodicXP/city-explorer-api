@@ -2,8 +2,13 @@
 
 // ** 1. Imports / Dependencies **
 require('dotenv').config();
+const axios = require('axios');
 const express = require('express');
 const cors = require('cors');
+
+// Import any env
+const PORT = process.env.PORT || 3001;
+const weatherApiKey = process.env.WEATHER_API_KEY;
 
 // Import any helper modules or classes
 const Forecast = require('./modules/Forecast'); 
@@ -12,8 +17,6 @@ const weatherData = require('./data/weather.json');
 // ** 2. Configuration and Middleware **
 const app = express(); // Initiate express
 app.use(cors()); // Enable cross-origin requests
-
-const PORT = process.env.PORT || 3001;
 
 // ** 3. Routes **
 app.get('/', getDefaultRoute);
@@ -26,8 +29,8 @@ function getDefaultRoute(request, response) {
   response.send('hello from the home route!');
 };
 
-function getWeather(request, response) {
-  const { city_name, lat, lon } = request.query;
+async function getWeather(request, response, next) {
+  const { city_name, lat, lon } = request.query; // Destructure from request query
 
   // Validate query parameters
   const validationError = validateQueryParams(city_name, lat, lon);
@@ -35,15 +38,25 @@ function getWeather(request, response) {
     return response.status(400).send(validationError);
   }
 
-  // Find the city weather data
-  const cityWeatherData = findCityWeatherData(city_name, lat, lon);
-  if (cityWeatherData) {
-    // Map forecast data and send response
-    const forecastData = createForecastData(cityWeatherData.data);
-    response.send(forecastData);
-  } else {
-    response.status(404).send('City weather data not found');
+  const url = `https://api.weatherbit.io/v2.0/forecast/daily?key=${weatherApiKey}&lat=${lat}&lon=${lon}`;
+  
+  try {
+    const weatherResponse = await axios.get(url);
+    response.send(weatherResponse.data);
+  } catch (error) {
+    console.error('Error fetching weather data', error);
+    next(error);
   }
+
+  // Find the city weather data
+  // const cityWeatherData = findCityWeatherData(city_name, lat, lon);
+  // if (cityWeatherData) {
+  //   // Map forecast data and send response
+  //   const forecastData = createForecastData(cityWeatherData.data);
+  //   response.send(forecastData);
+  // } else {
+  //   response.status(404).send('City weather data not found');
+  // }
 };
 
 function getNotFound(request, response) {
