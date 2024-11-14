@@ -16,17 +16,23 @@ app.use(cors()); // Enable cross-origin requests
 const PORT = process.env.PORT || 3001;
 
 // ** 3. Routes **
-app.get('/', (req, res) => {
-  res.send('hello from the home route!');
-});
+app.get('/', getDefaultRoute);
+app.get('/weather', getWeather);
+app.get('*', getNotFound); // 404 - Return route not found
+app.use('*', handleError); // 500 - Return server side error
 
-app.get('/weather', (req, res) => {
-  const { city_name, lat, lon } = req.query;
+// ** 4. Route Handlers **
+function getDefaultRoute(request, response) {
+  response.send('hello from the home route!');
+};
+
+function getWeather(request, response) {
+  const { city_name, lat, lon } = request.query;
 
   // Validate query parameters
   const validationError = validateQueryParams(city_name, lat, lon);
   if (validationError) {
-    return res.status(400).send(validationError);
+    return response.status(400).send(validationError);
   }
 
   // Find the city weather data
@@ -34,28 +40,30 @@ app.get('/weather', (req, res) => {
   if (cityWeatherData) {
     // Map forecast data and send response
     const forecastData = createForecastData(cityWeatherData.data);
-    res.send(forecastData);
+    response.send(forecastData);
   } else {
-    res.status(404).send('City weather data not found');
+    response.status(404).send('City weather data not found');
   }
-});
+};
 
-// 404 - Not Found Route
-app.get('*', (req, res) => {
-  res.status(404).send('Not found');
-});
+function getNotFound(request, response) {
+  response.status(404).send('Not found');
+}
 
-app.use('*', errorHandler);
+function handleError(error, request, response, next) {
+  response.status(500).send(`Something went wrong. ${error.message}`);
+};
 
-// ** 4. Helper Functions ** 
-const validateQueryParams = (cityName, lat, lon) => {
+// ** 5. Helper Functions **
+function validateQueryParams(cityName, lat, lon) {
   if (!cityName || !lat || !lon) {
     return 'Missing required query parameters: cityName, lat, lon';
   }
+
   return null;
 };
 
-const findCityWeatherData = (cityName, lat, lon) => {
+function findCityWeatherData(cityName, lat, lon) {
   const latitude = roundToThreeDecimals(parseFloat(lat));
   const longitude = roundToThreeDecimals(parseFloat(lon));
 
@@ -66,15 +74,17 @@ const findCityWeatherData = (cityName, lat, lon) => {
   });
 };
 
-const createForecastData = (data) => {
+function createForecastData(data) {
   return data.map((day) => new Forecast(day.datetime, day.weather.description));
 };
 
-const roundToThreeDecimals = (num) => Math.round(num * 1000) / 1000;
-
-const errorHandler = (error, request, response, next) => {
-  response.status(500).send(`Something went wrong. ${error.message}`);
+function roundToThreeDecimals(num) {
+  return Math.round(num * 1000) / 1000;
 }
 
+function startServer() {
+  app.listen(PORT, () => console.log(`Listening on ${PORT}`));  
+};
+
 // ** 5. Start Server ** 
-app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+startServer();
