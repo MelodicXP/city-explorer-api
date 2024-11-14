@@ -9,6 +9,7 @@ const cors = require('cors');
 // Import any env
 const PORT = process.env.PORT || 3001;
 const weatherApiKey = process.env.WEATHER_API_KEY;
+const movieApiKey = process.env.MOVIE_API_KEY;
 
 // Import any helper modules or classes
 const Forecast = require('./modules/Forecast'); 
@@ -21,6 +22,7 @@ app.use(cors()); // Enable cross-origin requests
 // ** 3. Routes **
 app.get('/', getDefaultRoute);
 app.get('/weather', getWeather);
+app.get('/movies', getMovies);
 app.get('*', getNotFound); // 404 - Return route not found
 app.use('*', handleError); // 500 - Return server side error
 
@@ -50,9 +52,29 @@ async function getWeather(request, response, next) {
   }
 };
 
+async function getMovies(request, response, next) {
+  const city_name = request.query.query; // Destructure from request query
+  console.log('City Query: ', city_name);
+
+  // Validate query parameters
+  if (!city_name) {
+    return response.status(400).send(validationError);
+  }
+
+  const url = `https://api.themoviedb.org/3/search/movie?query=${city_name}&api_key=${movieApiKey}`;
+
+  try {
+    const movieResponse = await axios.get(url);
+    response.json(movieResponse.data.results);
+  } catch (error) {
+    console.error('Error fetching movie data', error);
+    next(error);
+  }
+};
+
 function getNotFound(request, response) {
   response.status(404).send('Not found');
-}
+};
 
 function handleError(error, request, response, next) {
   response.status(500).send(`Something went wrong. ${error.message}`);
@@ -84,7 +106,7 @@ function createForecastData(data) {
 
 function roundToThreeDecimals(num) {
   return Math.round(num * 1000) / 1000;
-}
+};
 
 function startServer() {
   app.listen(PORT, () => console.log(`Listening on ${PORT}`));  
