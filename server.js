@@ -42,21 +42,12 @@ async function getWeather(request, response, next) {
   
   try {
     const weatherResponse = await axios.get(url);
-    response.send(weatherResponse.data);
+    const forecastData = createForecastData(weatherResponse.data.data)
+    response.send(forecastData);
   } catch (error) {
     console.error('Error fetching weather data', error);
     next(error);
   }
-
-  // Find the city weather data
-  // const cityWeatherData = findCityWeatherData(city_name, lat, lon);
-  // if (cityWeatherData) {
-  //   // Map forecast data and send response
-  //   const forecastData = createForecastData(cityWeatherData.data);
-  //   response.send(forecastData);
-  // } else {
-  //   response.status(404).send('City weather data not found');
-  // }
 };
 
 function getNotFound(request, response) {
