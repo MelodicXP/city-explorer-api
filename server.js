@@ -13,6 +13,7 @@ const movieApiKey = process.env.MOVIE_API_KEY;
 
 // Import any helper modules or classes
 const Forecast = require('./modules/Forecast'); 
+const Movie = require('./modules/Movie')
 const weatherData = require('./data/weather.json');
 
 // ** 2. Configuration and Middleware **
@@ -54,7 +55,6 @@ async function getWeather(request, response, next) {
 
 async function getMovies(request, response, next) {
   const city_name = request.query.query; // Destructure from request query
-  console.log('City Query: ', city_name);
 
   // Validate query parameters
   if (!city_name) {
@@ -65,11 +65,16 @@ async function getMovies(request, response, next) {
 
   try {
     const movieResponse = await axios.get(url);
-    response.json(movieResponse.data.results);
+    const movieData = createMovieData(movieResponse.data.results);
+    response.send(movieData);
   } catch (error) {
     console.error('Error fetching movie data', error);
     next(error);
   }
+};
+
+function createMovieData(data) {
+  return data.map((movie) => new Movie(movie));
 };
 
 function getNotFound(request, response) {
