@@ -2,120 +2,26 @@
 
 // ** 1. Imports / Dependencies **
 require('dotenv').config();
-const axios = require('axios');
 const express = require('express');
 const cors = require('cors');
-
-// Import any env
-const PORT = process.env.PORT || 3001;
-const weatherApiKey = process.env.WEATHER_API_KEY;
-const movieApiKey = process.env.MOVIE_API_KEY;
-
-// Import any helper modules or classes
-const Forecast = require('./modules/Forecast'); 
-const Movie = require('./modules/Movie')
-const weatherData = require('./data/weather.json');
+const handleError = require('./helpers/responseHandler');
+const router = require('./routes');
 
 // ** 2. Configuration and Middleware **
-const app = express(); // Initiate express
-app.use(cors()); // Enable cross-origin requests
+const app = express();
+app.use(cors());
 
-// ** 3. Routes **
-app.get('/', getDefaultRoute);
-app.get('/weather', getWeather);
-app.get('/movies', getMovies);
-app.get('*', getNotFound); // 404 - Return route not found
-app.use('*', handleError); // 500 - Return server side error
+// ** 3. Use Routes **
+app.use(router);
 
-// ** 4. Route Handlers **
-function getDefaultRoute(request, response) {
-  response.send('hello from the home route!');
-};
+// ** 4. Error Handling Middleware **
+app.use(handleError);
 
-async function getWeather(request, response, next) {
-  const { city_name, lat, lon } = request.query; // Destructure from request query
-
-  // Validate query parameters
-  const validationError = validateQueryParams(city_name, lat, lon);
-  if (validationError) {
-    return response.status(400).send(validationError);
-  }
-
-  const url = `https://api.weatherbit.io/v2.0/forecast/daily?key=${weatherApiKey}&lat=${lat}&lon=${lon}`;
-  
-  try {
-    const weatherResponse = await axios.get(url);
-    const forecastData = createForecastData(weatherResponse.data.data)
-    response.send(forecastData);
-  } catch (error) {
-    console.error('Error fetching weather data', error);
-    next(error);
-  }
-};
-
-async function getMovies(request, response, next) {
-  const city_name = request.query.query; // Destructure from request query
-
-  // Validate query parameters
-  if (!city_name) {
-    return response.status(400).send(validationError);
-  }
-
-  const url = `https://api.themoviedb.org/3/search/movie?query=${city_name}&api_key=${movieApiKey}`;
-
-  try {
-    const movieResponse = await axios.get(url);
-    const movieData = createMovieData(movieResponse.data.results);
-    response.send(movieData);
-  } catch (error) {
-    console.error('Error fetching movie data', error);
-    next(error);
-  }
-};
-
-function createMovieData(data) {
-  return data.map((movie) => new Movie(movie));
-};
-
-function getNotFound(request, response) {
-  response.status(404).send('Not found');
-};
-
-function handleError(error, request, response, next) {
-  response.status(500).send(`Something went wrong. ${error.message}`);
-};
-
-// ** 5. Helper Functions **
-function validateQueryParams(cityName, lat, lon) {
-  if (!cityName || !lat || !lon) {
-    return 'Missing required query parameters: cityName, lat, lon';
-  }
-
-  return null;
-};
-
-function findCityWeatherData(cityName, lat, lon) {
-  const latitude = roundToThreeDecimals(parseFloat(lat));
-  const longitude = roundToThreeDecimals(parseFloat(lon));
-
-  return weatherData.find((city) => {
-    return city.city_name.toLowerCase() === cityName.toLowerCase() &&
-           roundToThreeDecimals(city.lat) === latitude &&
-           roundToThreeDecimals(city.lon) === longitude;
-  });
-};
-
-function createForecastData(data) {
-  return data.map((day) => new Forecast(day.datetime, day.weather.description));
-};
-
-function roundToThreeDecimals(num) {
-  return Math.round(num * 1000) / 1000;
-};
-
+// ** 5. Start Server **
+const PORT = process.env.PORT || 3001;
 function startServer() {
   app.listen(PORT, () => console.log(`Listening on ${PORT}`));  
 };
 
-// ** 5. Start Server ** 
 startServer();
+
