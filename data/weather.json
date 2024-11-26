@@ -1,4 +1,5 @@
-{
+[
+  {
     "city_name": "Seattle",
     "country_code": "US",
     "data": [
@@ -316,3 +317,4 @@
     "state_code": "WA",
     "timezone": "America/Los_Angeles"
   }
+]
