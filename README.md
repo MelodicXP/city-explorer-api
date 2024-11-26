@@ -48,6 +48,10 @@ Tools used were express, cors, dotenv
 
 ## Change Log
 
+### 11-26-2024 - Lab 10
+
+Name of feature: Refactor code
+
 ### 10-31-2022 - Lab 10
 
 Name of feature: Add cache to back-end
